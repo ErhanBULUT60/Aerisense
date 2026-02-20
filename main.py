@@ -34,15 +34,22 @@ def process_and_crop_object(image_path):
     # HSV is more robust for color-based segmentation
     hsv_image = cv2.cvtColor(src_image, cv2.COLOR_BGR2HSV)
 
-    # 3. Define Color Range for Detection (e.g., Red color)
-    # Note: Red often wraps around the 0-180 Hue scale in OpenCV
-    lower_red = np.array([0, 120, 70])
-    upper_red = np.array([10, 255, 255])
+    # 3. Define Color Range for Detection (Red color wraps around 0 and 180)
+    # Lower range: 0-10
+    lower_red1 = np.array([0, 120, 70])
+    upper_red1 = np.array([10, 255, 255])
+    # Upper range: 170-180
+    lower_red2 = np.array([170, 120, 70])
+    upper_red2 = np.array([180, 255, 255])
     
-    # Create a binary mask where red pixels are white (255) and others are black (0)
-    mask = cv2.inRange(hsv_image, lower_red, upper_red)
+    # Create two binary masks
+    mask1 = cv2.inRange(hsv_image, lower_red1, upper_red1)
+    mask2 = cv2.inRange(hsv_image, lower_red2, upper_red2)
 
-    # 4. Find Contours (Shapes) in the mask
+    # 4. Use bitwise_or to combine both red masks
+    mask = cv2.bitwise_or(mask1, mask2)
+
+    # 5. Find Contours (Shapes) in the combined mask
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     if contours:

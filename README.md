@@ -20,7 +20,7 @@ To run this project, the following libraries must be installed:
 You can install the necessary packages using pip:
 
 ```bash
-pip install opencv-python numpy
+pip install opencv-python numpy or using requirements.txt file  
 ```
 
 ## Usage
