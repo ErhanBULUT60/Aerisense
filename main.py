@@ -71,7 +71,7 @@ def process_and_crop_object(image_path):
         cv2.imshow('Cropped ROI', cropped_object)
         
         # Save the slice to a file
-        cv2.imwrite('output_crop.jpg', cropped_object)
+        cv2.imwrite('images/output_crop.jpg', cropped_object)
         print("Success: ROI (Region of Interest) has been saved.")
 
     else:
@@ -82,4 +82,4 @@ def process_and_crop_object(image_path):
 
 # To run the simulation:
 if __name__ == "__main__":
- process_and_crop_object('Red_Apple.jpg')
+ process_and_crop_object('images/Red_Apple.jpg')
