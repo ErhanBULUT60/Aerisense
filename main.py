@@ -30,9 +30,13 @@ def process_and_crop_object(image_path):
         print(f"Error: Could not find image at {image_path}")
         return
 
-    # 2. Convert Color Space (BGR to HSV)
+    # 2. Pre-processing: Blur the image to reduce noise
+    # Gaussian Blur helps to smooth out pixel variations before color segmentation
+    blurred_image = cv2.GaussianBlur(src_image, (5, 5), 0)
+
+    # 3. Convert Color Space (BGR to HSV)
     # HSV is more robust for color-based segmentation
-    hsv_image = cv2.cvtColor(src_image, cv2.COLOR_BGR2HSV)
+    hsv_image = cv2.cvtColor(blurred_image, cv2.COLOR_BGR2HSV)
 
     # 3. Define Color Range for Detection (Red color wraps around 0 and 180)
     # Lower range: 0-10
@@ -46,8 +50,15 @@ def process_and_crop_object(image_path):
     mask1 = cv2.inRange(hsv_image, lower_red1, upper_red1)
     mask2 = cv2.inRange(hsv_image, lower_red2, upper_red2)
 
-    # 4. Use bitwise_or to combine both red masks
+    # 5. Use bitwise_or to combine both red masks
     mask = cv2.bitwise_or(mask1, mask2)
+
+    # 6. Morphological Operations
+    # Opening: removes noise (erosion followed by dilation)
+    # Closing: fills holes (dilation followed by erosion)
+    kernel = np.ones((5, 5), np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 
     # 5. Find Contours (Shapes) in the combined mask
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
