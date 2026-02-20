@@ -1,2 +1,65 @@
-print("Hello, World!")
-print("Hello, Erhan")
+import cv2
+import numpy as np
+
+def process_and_crop_object(image_path):
+    # 1. Load the Image
+    # 'image' is a NumPy array with shape (height, width, channels)
+    src_image = cv2.imread(image_path)
+    
+    if src_image is None:
+        print(f"Error: Could not find image at {image_path}")
+        return
+
+    # 2. Convert Color Space (BGR to HSV)
+    # HSV is more robust for color-based segmentation
+    hsv_image = cv2.cvtColor(src_image, cv2.COLOR_BGR2HSV)
+
+    # 3. Define Color Range for Detection (e.g., Red color)
+    # Note: Red often wraps around the 0-180 Hue scale in OpenCV
+    lower_red = np.array([0, 120, 70])
+    upper_red = np.array([10, 255, 255])
+    
+    # Create a binary mask where red pixels are white (255) and others are black (0)
+    mask = cv2.inRange(hsv_image, lower_red, upper_red)
+
+    # 4. Find Contours (Shapes) in the mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    if contours:
+        # Get the largest contour based on area
+        largest_contour = max(contours, key=cv2.contourArea)
+        
+        # Get Bounding Box coordinates: x, y (top-left), w (width), h (height)
+        x, y, w, h = cv2.boundingRect(largest_contour)
+
+        # 5. IMAGE SLICING (The core part of your question)
+        # Slicing the upper corner (top-left) of the original image
+        height, width = src_image.shape[:2]
+        crop_h = int(height * 0.25)
+        crop_w = int(width * 0.25)
+        cropped_object = src_image[0:crop_h, 0:crop_w]
+
+        # 6. Visualization (Drawing results on the original image)
+        # cv2.rectangle(image, start_point(x,y), end_point(x,y), color(B,G,R), thickness)
+        cv2.rectangle(src_image, (0, 0), (crop_w, crop_h), (0, 255, 0), 3)
+        cv2.putText(src_image, "Upper Corner", (10, 30), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+        # 7. Show and Save Results
+        cv2.imshow('Binary Mask', mask)
+        cv2.imshow('Detection Result', src_image)
+        cv2.imshow('Cropped ROI', cropped_object)
+        
+        # Save the slice to a file
+        cv2.imwrite('output_crop.jpg', cropped_object)
+        print("Success: ROI (Region of Interest) has been saved.")
+
+    else:
+        print("No object detected within the specified color range.")
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+# To run the simulation:
+if __name__ == "__main__":
+ process_and_crop_object('Red_Apple.jpg')
