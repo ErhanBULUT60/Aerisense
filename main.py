@@ -1,7 +1,27 @@
+"""Module for image processing, color detection, and image slicing.
+
+This module uses OpenCV to detect red-colored objects in an image and
+slices the upper-left corner for Region of Interest (ROI) analysis.
+"""
 import cv2
 import numpy as np
 
 def process_and_crop_object(image_path):
+    """Processes an image to detect red objects and crops the upper-left corner.
+
+    The function performs the following steps:
+    1. Loads the image from the given path.
+    2. Converts the image to HSV color space.
+    3. Masks red colors and finds contours.
+    4. Slices the top-left 25% of the image as a Region of Interest (ROI).
+    5. Visualizes the ROI on the original image and saves the crop.
+
+    Args:
+        image_path (str): Absolute or relative path to the input image file.
+
+    Returns:
+        None: Displays results using OpenCV pindows and saves 'output_crop.jpg'.
+    """
     # 1. Load the Image
     # 'image' is a NumPy array with shape (height, width, channels)
     src_image = cv2.imread(image_path)
